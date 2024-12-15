@@ -1,0 +1,3 @@
+common --client_env=CC=clang-18
+common --cxxopt=--stdlib=libc++
+common --cxxopt=--std=c++20
