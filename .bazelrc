@@ -1,3 +1,9 @@
-common --client_env=CC=clang-18
-common --cxxopt=--stdlib=libc++
-common --cxxopt=--std=c++20
+# TODO: replace with actual cc_toolchain
+common --client_env="CC=/usr/lib/llvm-18/bin/clang"
+common --cxxopt="--stdlib=libc++"
+common --linkopt="-lc++"
+common --linkopt="-L/usr/lib/llvm-18/lib"
+common --linkopt="-Wl,-rpath,/usr/lib/llvm-18/lib"
+common --cxxopt="--std=c++20"
+
+test --test_output=all
