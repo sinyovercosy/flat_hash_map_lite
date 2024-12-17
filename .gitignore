@@ -1,6 +1,6 @@
 bazel-bin
 bazel-out
 bazel-testlogs
-bazel-codespaces-blank
+bazel-flat_hash_map_lite
 compile_commands.json
 .vscode
