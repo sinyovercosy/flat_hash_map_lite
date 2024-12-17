@@ -5,8 +5,15 @@
 
 namespace ty {
 
-template <typename K, typename V, typename Hash = std::hash<K>, typename Eq = std::equal_to<K>, typename Allocator = std::allocator<std::pair<const K, V>>>
-  requires std::equality_comparable<K> && std::is_nothrow_invocable_r_v<std::size_t, Hash, K> && std::is_move_constructible_v<std::pair<const K, V>>
+enum class ProbingScheme { kLinear, kQuadratic };
+
+template <typename K,
+          typename V,
+          typename Hash = std::hash<K>,
+          typename Eq = std::equal_to<K>,
+          ProbingScheme P = ProbingScheme::kQuadratic,
+          typename Allocator = std::allocator<std::pair<const K, V>>>
+  requires std::is_nothrow_invocable_r_v<std::size_t, Hash, K> && std::equivalence_relation<Eq, K, K> && std::is_move_constructible_v<std::pair<const K, V>>
 class flat_hash_map_lite {
  public:
   using value_type = std::pair<const K, V>;
@@ -50,7 +57,10 @@ class flat_hash_map_lite {
   struct ProbeSeq {
     std::size_t NextOffset() {
       i++;
-      std::size_t ret = i * i;
+      std::size_t ret = i;
+      if constexpr (P == ProbingScheme::kQuadratic) {
+        ret = (i + i * i) >> 1;
+      }
       return ret;
     }
     std::uint32_t i = 0;
@@ -62,7 +72,7 @@ class flat_hash_map_lite {
     ProbeSeq seq;
     std::size_t i = origin;
     while (ctrl_[i]) {
-      if (data_[i].first == key) {
+      if (Eq{}(data_[i].first, key)) {
         return i;
       } else {
         i = Clamp(origin + seq.NextOffset(), capacity_);
@@ -73,7 +83,7 @@ class flat_hash_map_lite {
 
   void Rehash() {
     const std::size_t new_capacity = capacity_ * 2;
-    std::vector<bool, Allocator> new_ctrl(new_capacity, allocator_);
+    std::vector<bool, Allocator> new_ctrl(new_capacity, false, allocator_);
     value_type* new_data = allocator_.allocate(new_capacity);
     for (std::size_t i = 0; i < ctrl_.size(); ++i) {
       if (!ctrl_[i]) {
