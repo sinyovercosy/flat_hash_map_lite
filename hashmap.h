@@ -13,7 +13,7 @@ template <typename K,
           typename Eq = std::equal_to<K>,
           ProbingScheme P = ProbingScheme::kQuadratic,
           typename Allocator = std::allocator<std::pair<const K, V>>>
-  requires std::is_nothrow_invocable_r_v<std::size_t, Hash, K> && std::equivalence_relation<Eq, K, K> && std::is_move_constructible_v<std::pair<const K, V>>
+  requires std::is_invocable_r_v<std::size_t, Hash, K> && std::equivalence_relation<Eq, K, K> && std::is_move_constructible_v<std::pair<const K, V>>
 class flat_hash_map_lite {
  public:
   using value_type = std::pair<const K, V>;
