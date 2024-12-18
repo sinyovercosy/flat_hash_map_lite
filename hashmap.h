@@ -34,7 +34,7 @@ class flat_hash_map_lite {
    * @returns: (pointer to the inserted element or an existing element with equal key, a boolean indicating if insertion took place)
    */
   std::pair<value_type*, bool> insert(value_type kv) {
-    if (size_ + 1 >= capacity_) {
+    if (size_ + 1 >= ResizeThreshold()) {
       Rehash();  // assume that we are likely inserting a new element
     }
     std::size_t i = FindIndex(kv.first);
